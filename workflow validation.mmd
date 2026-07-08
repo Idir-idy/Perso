@@ -1,0 +1,31 @@
+flowchart TD
+    A[Arrivée fichier CSV<br/>n demandes/lignes] --> B[Formalisation état fichier<br/>parsing / lecture du format]
+    B --> C[Validation N1 par demande<br/>format colonnes, format data]
+    C -->|Fichier corrompu / mauvaise extension<br/>PAS de validation contenu| D((Traitement: Ignoré))
+    C -->|Au moins 1 demande OK| E[Traitement: Initié<br/>demandes OK → état Initiée<br/>demandes KO → état Rejetée]
+
+    E -->|demande: Rejetée| H[Bloc KO]
+    E -->|demande: Initiée| G[Choix Opérateur]
+
+    G -->|Accepter/Valider| I[Validation N2]
+    G -->|Refuser → demande: Refusée| H
+
+    I -->|OK → demande: Validée| R[Mise à jour Ordres + Mise à jour Référentiel]
+    I -->|KO horodatage → demande: À valider<br/>action requise sur l'IHM| K{Choix opérateur}
+
+    K -->|Forcer → demande: Validée| R
+    K -->|Refuser → demande: Refusée| H
+
+    H --> N[Autre]
+    H --> O[Création]
+    H --> P[Modification]
+
+    N --> J[Mise à jour Ordres]
+    P --> J
+
+    O --> T{TRID existant en DB ?}
+    T -->|Oui| J
+    T -->|Non| R
+
+    R --> Q((Fin traitement))
+    J --> Q
